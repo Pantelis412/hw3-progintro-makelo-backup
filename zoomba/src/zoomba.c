@@ -2,25 +2,47 @@
 #include <stdlib.h>
 #include <math.h>
 
-typedef struct node {
-    int dir;
-    struct tree *left;
-    struct tree *right;
-}tree;
+int DirR[] = {-1, 0, 1, 0};
+int DirC[] = {0, 1, 0, -1};
+
+typedef struct {
+
+} Queue;
+
+struct node{
+    struct node *next;
+};
 
 typedef struct {
     int x;
     int y;
-}position;
+} Position;
 
-void search(int dim, char **room, position *zoomba, position *trash) {
+// int Existence() {
+//     if () (
 
+//     )
+// }
+
+void search(int dim, char **room, Position zoomba, Position trash) {
+    char **visited = malloc(dim * sizeof(char*)); //introducing a 2-dimensional array that marks if a cell has been visited or not
+    for (int i = 0; i < dim; i++) {
+        visited[i] = malloc(dim * sizeof(char));
+        for (int j = 0; j < dim; j++) {
+            visited[i][j] = room[i][j];
+        }
+    }
+    visited[zoomba.x][zoomba.y] = 1;
+    int RowZ = zoomba.x;
+    int ColZ = zoomba.y;
+    int RowT = trash.x;
+    int ColT = trash.y;
 }
 
 int main(void) {
     int dim;
-    position zoomba;
-    position trash;
+    Position zoomba;
+    Position trash;
     if (!(fscanf(stdin, "%d", &dim))) exit(1); //getting the dimensions
     fflush(stdin);
     if (!(fscanf(stdin, "%d", &zoomba.x))) exit(1);
@@ -49,8 +71,8 @@ int main(void) {
         }
     }
     if (size[dim * dim] != '\0') exit(1);
-    if (room[zoomba.x][zoomba.x] == 1 || room[trash.x][trash.y] == 1) exit(1); //checking if the machine or the trash is on top of an obstacle
-    search(dim, room, &zoomba, &trash); //accessing the function
+    if (room[zoomba.x][zoomba.y] == 1 || room[trash.x][trash.y] == 1) exit(1); //checking if the machine or the trash is on top of an obstacle
+    search(dim, room, zoomba, trash); //accessing the function
     for (int i = 0; i < dim; i++) { //freeing the two-dimensional array of the room
         free(room[i]);
     }
