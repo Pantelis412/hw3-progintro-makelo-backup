@@ -2,12 +2,15 @@
 #include <stdlib.h>
 #include <math.h>
 
+int dim;
 int DirR[] = {-1, 0, 1, 0};
 int DirC[] = {0, 1, 0, -1};
 
-typedef struct {
-
-} Queue;
+struct queue{
+    int front;
+    int rear;
+    int size;
+};
 
 struct node{
     struct node *next;
@@ -18,13 +21,52 @@ typedef struct {
     int y;
 } Position;
 
-// int Existence() {
-//     if () (
+int enqueue() {
 
-//     )
-// }
+}
 
-void search(int dim, char **room, Position zoomba, Position trash) {
+int existence(**visited, int h, int v) {
+    if (h < 0 || v < 0 || h >= dim || v >= dim || visited[h][v]) return 0;
+    else return 1;
+
+}
+
+int empty(struct queue* q) {
+  if (q->rear == -1)
+    return 1;
+  else
+    return 0;
+}
+
+struct queue *create() {
+   struct queue *q = malloc(sizeof(struct queue));
+   q->front = -1;
+   q->rear = -1;
+   return q;
+}
+
+int direction(char **visited, int RowZ, int ColZ, char *choices, int count) {
+    int yes = 0
+    for (int i = 0; i < 4; i++) {
+        int adjx = RowZ + DirZ[i];
+        int adjy = ColZ + DirC[i];
+        if (existence(visited, adjx, adjy)) {
+            yes++;
+            RowZ = adjx;
+            ColZ = adjy;
+            visited[RowZ, ColZ] = 1;
+            if (i == 0) choices[count] = "U";
+            else if (i == 1) choices[count] = "R";
+            else if (i == 2) choices[count] = "D";
+            else if (i == 3) choices[count] = "L";
+            count++;
+            return direction(char **visited, int RowZ, int ColZ, char *choices, int count);
+        }
+    }
+    return 0;
+}
+
+void search(char **room, Position zoomba, Position trash) {
     char **visited = malloc(dim * sizeof(char*)); //introducing a 2-dimensional array that marks if a cell has been visited or not
     for (int i = 0; i < dim; i++) {
         visited[i] = malloc(dim * sizeof(char));
@@ -33,14 +75,18 @@ void search(int dim, char **room, Position zoomba, Position trash) {
         }
     }
     visited[zoomba.x][zoomba.y] = 1;
+    char *choices = malloc(dim * dim * sizeof(char));
     int RowZ = zoomba.x;
     int ColZ = zoomba.y;
-    int RowT = trash.x;
-    int ColT = trash.y;
+    struct queue *q = create();
+    enqueue(q, )
+    int count = 0;
+    while (!empty(q)) {
+        direction(visited, RowZ, ColZ, choices, count);
+    }
 }
 
 int main(void) {
-    int dim;
     Position zoomba;
     Position trash;
     if (!(fscanf(stdin, "%d", &dim))) exit(1); //getting the dimensions
@@ -72,7 +118,7 @@ int main(void) {
     }
     if (size[dim * dim] != '\0') exit(1);
     if (room[zoomba.x][zoomba.y] == 1 || room[trash.x][trash.y] == 1) exit(1); //checking if the machine or the trash is on top of an obstacle
-    search(dim, room, zoomba, trash); //accessing the function
+    search(room, zoomba, trash); //accessing the function
     for (int i = 0; i < dim; i++) { //freeing the two-dimensional array of the room
         free(room[i]);
     }
