@@ -1,69 +1,86 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#define MAX 100000000
 
+int counter;
 int dim;
 int DirR[] = {-1, 0, 1, 0};
 int DirC[] = {0, 1, 0, -1};
 
-struct queue{
-    int front;
-    int rear;
-    int size;
-};
-
 struct node{
+    int value;
     struct node *next;
 };
+
+typedef struct{
+    struct node *front;
+    struct node *rear;
+    int size[MAX];
+} queue;
 
 typedef struct {
     int x;
     int y;
 } Position;
 
-int enqueue() {
+// int enqueue(queue *q, ) {
 
-}
+// }
 
-int existence(**visited, int h, int v) {
+int existence(char **visited, int h, int v) {
     if (h < 0 || v < 0 || h >= dim || v >= dim || visited[h][v]) return 0;
     else return 1;
-
 }
 
-int empty(struct queue* q) {
-  if (q->rear == -1)
+int empty(queue* q) {
+  if (q->rear == NULL)
     return 1;
   else
     return 0;
 }
 
-struct queue *create() {
-   struct queue *q = malloc(sizeof(struct queue));
-   q->front = -1;
-   q->rear = -1;
-   return q;
+queue *create() {
+   queue *q = malloc(sizeof(queue));
+   q->front = NULL;
+   q->rear = NULL;
 }
 
-int direction(char **visited, int RowZ, int ColZ, char *choices, int count) {
-    int yes = 0
+int print(char *choices) {
+    choices = realloc(choices, (counter + 1) * sizeof(char));
+    choices[counter + 1] = '\0';
+    printf("%s\n", choices);
+}
+
+int direction(char **visited, int RowZ, int ColZ, char *choices, int count, Position trash) {
     for (int i = 0; i < 4; i++) {
-        int adjx = RowZ + DirZ[i];
+        int adjx = RowZ + DirR[i];
         int adjy = ColZ + DirC[i];
         if (existence(visited, adjx, adjy)) {
-            yes++;
             RowZ = adjx;
             ColZ = adjy;
-            visited[RowZ, ColZ] = 1;
-            if (i == 0) choices[count] = "U";
-            else if (i == 1) choices[count] = "R";
-            else if (i == 2) choices[count] = "D";
-            else if (i == 3) choices[count] = "L";
-            count++;
-            return direction(char **visited, int RowZ, int ColZ, char *choices, int count);
+            if (RowZ != trash.x && ColZ != trash.y) {
+                visited[RowZ][ColZ] = 1;
+                if (i == 0) choices[count] = 'U';
+                else if (i == 1) choices[count] = 'R';
+                else if (i == 2) choices[count] = 'D';
+                else if (i == 3) choices[count] = 'L';
+                count++;
+                return direction(visited, RowZ, ColZ, choices, count, trash);
+            } else {
+                counter = count;
+                return 1;
+            }
         }
     }
-    return 0;
+    if (choices[count - 1] == 'U') RowZ++;
+    else if (choices[count - 1] == 'R') ColZ--;
+    else if (choices[count - 1] == 'D') RowZ--;
+    else if (choices[count - 1] == 'L') ColZ++;
+    choices[count] = '\0';
+    count--;
+    if (count >= 0) return direction(visited, RowZ, ColZ, choices, count, trash);
+    else return 0;
 }
 
 void search(char **room, Position zoomba, Position trash) {
@@ -78,12 +95,16 @@ void search(char **room, Position zoomba, Position trash) {
     char *choices = malloc(dim * dim * sizeof(char));
     int RowZ = zoomba.x;
     int ColZ = zoomba.y;
-    struct queue *q = create();
-    enqueue(q, )
+    queue *q = create();
+    //enqueue(q, );
     int count = 0;
-    while (!empty(q)) {
-        direction(visited, RowZ, ColZ, choices, count);
+    //while (!empty(q)) {
+    //}
+    if(direction(visited, RowZ, ColZ, choices, count, trash) == 0) {
+        printf("impossible\n");
+        exit(1);
     }
+    print(choices);
 }
 
 int main(void) {
