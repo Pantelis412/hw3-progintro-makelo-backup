@@ -8,13 +8,20 @@ int DirC[] = {0, 1, 0, -1};//direction column
 
 typedef struct tree{
     char key;
-    tree * up;
-    tree * down;
-    tree * right;
-    tree * left;
-    tree * previous;
-    char data;
+    int row;
+    int collumn;
+    struct tree * up;
+    struct tree * down;
+    struct tree * right;
+    struct tree * left;
+    struct tree * previous;
+    //char data;
 }tree;
+
+typedef struct queue{
+    tree * pointer;
+    struct queue *next;
+}queue;
 
 int existence(char **visited, int h, int v) {// horizontal, vertical
     if (h < 0 || v < 0 || h >= dim || v >= dim) return 0;
@@ -22,55 +29,213 @@ int existence(char **visited, int h, int v) {// horizontal, vertical
     else return 1;
 }
 
+void add_node(tree *p, int U, int R, int D, int L, int row, int collumn, char **visited, queue **tail){
+    tree *previous;
+    printf("hello\n");
+    previous=p;
+    if(U==1)
+    {
+        p=p->up;
+        p=(tree*) malloc(sizeof(tree));
+        if (p==NULL){
+            perror("Not available memory\n");
+            exit(1);
+        }
+        p->up = p->down = p->left = p->right =NULL;
+        p->previous=previous;
+        p->row=row-1;
+        p->collumn=collumn;
+        p->key=visited[p->row][p->collumn];
+        visited[p->row][p->collumn]=1;
+        queue * new_node;
+        new_node=(queue*)malloc(sizeof(queue));
+        if(new_node==NULL){
+            perror("Not available memory\n");
+            exit(1);
+        }
+        (*tail)->next=new_node;
+        (*tail)=new_node;
+        new_node->pointer=p;
+        new_node->next=NULL;
+    }
+    if(R==1)
+    {
+        p=p->right;
+        p=(tree*) malloc(sizeof(tree));
+        if (p==NULL){
+            perror("Not available memory\n");
+            exit(1);
+        }
+        p->up = p->down = p->left = p->right =NULL;
+        p->previous=previous;
+        p->row=row;
+        p->collumn=collumn+1;
+        p->key=visited[p->row][p->collumn];
+        visited[p->row][p->collumn]=1;
+        queue * new_node;
+        new_node=(queue*)malloc(sizeof(queue));
+        if(new_node==NULL){
+            perror("Not available memory\n");
+            exit(1);
+        }
+        (*tail)->next=new_node;
+        (*tail)=new_node;
+        new_node->pointer=p;
+        new_node->next=NULL;
+    }
+    if(D==1)
+    {
+        p=p->down;
+        p=(tree*) malloc(sizeof(tree));
+        if (p==NULL){
+            perror("Not available memory\n");
+            exit(1);
+        }
+        p->up = p->down = p->left = p->right =NULL;
+        p->previous=previous;
+        p->row=row+1;
+        p->collumn=collumn;
+        p->key=visited[p->row][p->collumn];
+        visited[p->row][p->collumn]=1;
+        queue * new_node;
+        new_node=(queue*)malloc(sizeof(queue));
+        if(new_node==NULL){
+            perror("Not available memory\n");
+            exit(1);
+        }
+        (*tail)->next=new_node;
+        (*tail)=new_node;
+        new_node->pointer=p;
+        new_node->next=NULL;
+    }
+    if(L==1)
+    {
+        p=p->left;
+        p=(tree*) malloc(sizeof(tree));
+        if (p==NULL){
+            perror("Not available memory\n");
+            exit(1);
+        }
+        p->up = p->down = p->left = p->right =NULL;
+        p->previous=previous;
+        p->row=row;
+        p->collumn=collumn-1;
+        p->key=visited[p->row][p->collumn];
+        visited[p->row][p->collumn]=1;
+        queue * new_node;
+        new_node=(queue*)malloc(sizeof(queue));
+        if(new_node==NULL){
+            perror("Not available memory\n");
+            exit(1);
+        }
+        (*tail)->next=new_node;
+        (*tail)=new_node;
+        new_node->pointer=p;
+        new_node->next=NULL;
+    }
+}
+
+void delete_tree(tree *p){
+    if(p==NULL)
+        return;
+    delete_tree(p->up);
+    delete_tree(p->right);
+    delete_tree(p->down);
+    delete_tree(p->left);
+}
+
 void find_path(char **visited,int RowZ, int ColZ){
     tree * root;
     char key=visited[RowZ][ColZ];
-    char direction;
-    root =NULL;
+    //char direction;
+    //root =NULL;
     root=(tree*) malloc(sizeof(tree));
-        if (root=NULL){
+        if (root==NULL){
             perror("Not available memory\n");
             exit(1);
         }
     root->up = root->down = root->left = root->right =NULL;
     root->key=key;
     root->previous=NULL;
-    root->data='\0';
-
-    for (int i = 0; i < 4; i++) {
-        int adjx = RowZ + DirR[i];
-        int adjy = ColZ + DirC[i];
+    //root->data='\0';
+    root->row=RowZ;
+    root->collumn=ColZ;
+    
+    queue *head=NULL, *tail=NULL, *temp_head=NULL;
+    //Firstly we fill the queue with root.
+    queue * new_node;
+    new_node=(queue*)malloc(sizeof(queue));
+    if(new_node==NULL){
+        perror("Not available memory\n");
+        exit(1);
+    }
+    new_node->pointer=root;
+    head=tail=new_node;
+    new_node->next=NULL;
+    int U,R,D,L;
+    tree *navigator=NULL;
+    while(head!=NULL){//check_add_and_pop and fill the corresponding pop in visited array with 1 if we didnt find the trash
+        if(head->pointer->key==2){
+            navigator=head->pointer;
+            break;
+        }
+        U=R=D=L=0;
+        for (int i = 0; i < 4; i++) {//to find what positions are free to fill the tree
+        int adjx = tail->pointer->row + DirR[i];
+        int adjy = tail->pointer->collumn + DirC[i];
         if (existence(visited, adjx, adjy)) {
            
-        if(i==0)direction='U';
-        if(i==1)direction='R';
-        if(i==2)direction='D';
-        if(i==3)direction='L';
+        if(i==0){ U=1;}
+        if(i==1){ R=1;}
+        if(i==2){ D=1;}
+        if(i==3){ L=1;}
         }
+        add_node(tail->pointer, U, R, D, L, tail->pointer->row, tail->pointer->collumn, visited, &tail);
+        }
+        //pop the node we checked from the queue
+        temp_head=head->next;
+        free(head);
+        head=temp_head;
     }
-    root = add_node(root, key, direction);
+    if (navigator==NULL)printf("impossible\n");
+    else{
+        char *path=NULL;
+        int counter=0;
+        while(navigator!=NULL){
+            path=realloc(path, counter+1);
+            if (path==NULL){
+                perror("Not available memory\n");
+                exit(1);
+            }
+            if((navigator->previous->collumn)-(navigator->collumn)==1)
+                path[counter]='L';
+            else if((navigator->previous->collumn)-(navigator->collumn)==-1)
+                path[counter]='R';
+            else if((navigator->previous->row)-(navigator->row)==1)
+                path[counter]='U';
+            else if((navigator->previous->row)-(navigator->row)==-1)
+                path[counter]='D';
+            counter++;
+            navigator=navigator->previous;
+        }
+        for(int i=counter-1; i>=0; i--){
+            printf("%c",path[i]);
+        }
+        printf("\n");
+        free(path);
+    }   
+    //free the queue
+    while(head!=NULL){
+        temp_head=head->next;
+        free(head);
+        head=temp_head;
+    }
+    //free the tree
+    delete_tree(root);
     
 }
 
-tree* add_node(tree *p, char key, char direction){
-    if(p->up==NULL)
-    {
-        p->previous=p;
-        p=p->up;
-        p=(tree*) malloc(sizeof(tree));
-        if (p=NULL){
-            perror("Not available memory\n");
-            exit(1);
-        }
-        p->up = p->down = p->left = p->right =NULL;
-        p->key=key;
-    
-    }
-    else{
-        
-    }
-    return p;
-}
+
 
 
 int main(void) {
@@ -95,7 +260,7 @@ int main(void) {
     }
     if (feof(stdin) == EOF) exit(1);
     if (room[poszoo_x][poszoo_y] == 1 || room[trash_x][trash_y] == 1) exit(1); //checking if the machine or the trash is on top of an obstacle
-    if  (room[poszoo_x][poszoo_y] == room[trash_x][trash_y]){
+    if  (&room[poszoo_x][poszoo_y] == &room[trash_x][trash_y]){
         printf("No steps needed. Zoomba is on the trash");
         return 0;
     }
