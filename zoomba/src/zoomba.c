@@ -247,7 +247,7 @@ int main(void) {
     if (!(fscanf(stdin, "%d", &trash_x))) exit(1);
     if (!(fscanf(stdin, "%d", &trash_y))) exit(1);
     char t;
-    fscanf(stdin, "%c", &t);
+    if (!(fscanf(stdin, "%c", &t))) exit(1);
     printf("%d %d %d %d %d\n", dim, poszoo_x, poszoo_y, trash_x, trash_y);
     if (dim > 10000) exit(1); //checking if the dimensions exceed the allowed boundaries 
     if (poszoo_x >= dim || poszoo_y >= dim || trash_x >= dim || trash_y >= dim) exit(1); //checking if the position of the machine or the trash is out of bounds
@@ -264,18 +264,17 @@ int main(void) {
         char *temp;
         if(!(fread(temp, 1, 1, stdin))) exit(1);  
     }
-    if (feof(stdin) == EOF) exit(1);
+    //if (feof(stdin) == EOF) exit(1);
     if (room[poszoo_x][poszoo_y] == '1' || room[trash_x][trash_y] == '1') exit(1); //checking if the machine or the trash is on top of an obstacle
     if  (poszoo_x == trash_x && poszoo_y == trash_y){
         fprintf(stderr, "No steps needed. Zoomba is on the trash");
         return 0;
     }
-    for (int i = 0; i < dim; i++) {
-        for (int j = 0; j < dim; j++) {
-            printf("%c", room[i][j]);
-        }
-        printf("\n");
-    }
+    // for (int i = 0; i < dim; i++) {
+    //     for (int j = 0; j < dim; j++) {
+    //         printf("%c", room[i][j]);
+    //     }
+    // }
    
     char **visited = malloc(dim * sizeof(char*)); //introducing a 2-dimensional array that marks if a cell has been visited or not
     for (int i = 0; i < dim; i++) {
@@ -293,7 +292,7 @@ int main(void) {
         printf("\n");
     }
 
-    find_path(visited,poszoo_x,poszoo_y);
+    //find_path(visited,poszoo_x,poszoo_y);
 
 
 
