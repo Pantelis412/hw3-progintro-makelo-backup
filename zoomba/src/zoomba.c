@@ -16,7 +16,6 @@ typedef struct tree{
     struct tree * right;
     struct tree * left;
     struct tree * previous;
-    //char data;
 }tree;
 
 typedef struct queue{
@@ -29,15 +28,11 @@ int existence(char **visited, int h, int v) {// horizontal, vertical
     else if(visited[h][v]=='1')return 0;
     else return 1;
 }
-//tail->pointer, U, R, D, L, tail->pointer->row, tail->pointer->collumn, visited, &tail
 void add_node(tree *p, int U, int R, int D, int L, int row, int collumn, char **visited, queue **tail){
     tree *previous;
-    //printf("hello\n");
     previous=p;
-    printf("%d %d %d %d\n",U,R,D,L);
     if(U==1)
     {   
-        printf("U\n");
         p=p->up;
         p=(tree*) malloc(sizeof(tree));
         if (p==NULL){
@@ -60,11 +55,9 @@ void add_node(tree *p, int U, int R, int D, int L, int row, int collumn, char **
         (*tail)=new_node;
         new_node->pointer=p;
         new_node->next=NULL;
-        //printf("%p\n",(void*)new_node);
     }
     if(R==1)
     {   
-        printf("R\n");
         p=p->right;
         p=(tree*) malloc(sizeof(tree));
         if (p==NULL){
@@ -87,11 +80,9 @@ void add_node(tree *p, int U, int R, int D, int L, int row, int collumn, char **
         (*tail)=new_node;
         new_node->pointer=p;
         new_node->next=NULL;
-        //printf("%p\n",(void*)new_node);
     }
     if(D==1)
     {   
-        printf("D\n");
         p=p->down;
         p=(tree*) malloc(sizeof(tree));
         if (p==NULL){
@@ -114,11 +105,9 @@ void add_node(tree *p, int U, int R, int D, int L, int row, int collumn, char **
         (*tail)=new_node;
         new_node->pointer=p;
         new_node->next=NULL;
-        //printf("%p\n",(void*)new_node);
     }
     if(L==1)
     {   
-        printf("L\n");
         p=p->left;
         p=(tree*) malloc(sizeof(tree));
         if (p==NULL){
@@ -141,7 +130,6 @@ void add_node(tree *p, int U, int R, int D, int L, int row, int collumn, char **
         (*tail)=new_node;
         new_node->pointer=p;
         new_node->next=NULL;
-        //printf("%p\n",(void*)new_node);
     }
 }
 
@@ -157,8 +145,6 @@ void delete_tree(tree *p){
 void find_path(char **visited,int RowZ, int ColZ){
     tree * root;
     char key=visited[RowZ][ColZ];
-    //char direction;
-    //root =NULL;
     root=(tree*) malloc(sizeof(tree));
         if (root==NULL){
             perror("Not available memory\n");
@@ -167,7 +153,6 @@ void find_path(char **visited,int RowZ, int ColZ){
     root->up = root->down = root->left = root->right =NULL;
     root->key=key;
     root->previous=NULL;
-    //root->data='\0';
     root->row=RowZ;
     root->collumn=ColZ;
     
@@ -185,7 +170,6 @@ void find_path(char **visited,int RowZ, int ColZ){
     int U,R,D,L;
     tree *navigator=NULL;
     while(head!=NULL){//check_add_and_pop and fill the corresponding pop in visited array with 1 if we didnt find the trash
-        printf("%c pointer key\n", head->pointer->key);
         if(head->pointer->key=='2'){
             navigator=head->pointer;
             break;
@@ -208,18 +192,13 @@ void find_path(char **visited,int RowZ, int ColZ){
         }
         add_node(head->pointer, U, R, D, L, head->pointer->row, head->pointer->collumn, visited, &tail);
         
-        //pop the node we checked from the queue
         temp_head=head->next;
-        //printf("%p\n",(void *)head->next);
         free(head);
         head=temp_head;
-        //printf("%p\n",(void *)head);
     }
     if (navigator==NULL)printf("impossible\n");
     else{
-        //char *path=NULL;
-        perror("hi");
-        char *path=malloc(dim*dim*sizeof(char));
+        char *path=NULL;
         int counter=0;
         while(navigator!=root){
             path=realloc(path, sizeof(char)*(counter+1));
@@ -227,7 +206,6 @@ void find_path(char **visited,int RowZ, int ColZ){
                 perror("Not available memory\n");
                 exit(1);
             }
-            perror("ho");
             if((navigator->previous->collumn)-(navigator->collumn)==1)
                 path[counter]='L';
             else if((navigator->previous->collumn)-(navigator->collumn)==-1)
@@ -237,22 +215,15 @@ void find_path(char **visited,int RowZ, int ColZ){
             else if((navigator->previous->row)-(navigator->row)==-1)
                 path[counter]='D';
             counter++;
-            perror("ha");
-            printf("%d\n",counter);
             navigator=navigator->previous;
         }
-        perror("he");
-        char *final=malloc((counter+1)*sizeof(char));
-        for (int i=0; i<counter; i++){
-            final[counter-i-1]=path[i];
+        for(int i=counter-1; i>=0; i--){
+            printf("%c",path[i]);
         }
-        final[counter]='\0';
-        printf("%s\n",final);
-        // for(int i=counter-1; i>=0; i--){
-        //     printf("%c",path[i]);
-        // }
-        // printf("\n");
-        // free(path);
+        printf("\n");
+        free(path);
+       
+
     }   
     //free the queue
     while(head!=NULL){
