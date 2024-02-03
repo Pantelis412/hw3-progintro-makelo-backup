@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include<string.h>
 
 int dim;
 int DirR[] = {-1, 0, 1, 0};//direction row
@@ -182,16 +181,14 @@ void find_path(char **visited,int RowZ, int ColZ){
         adjy = head->pointer->collumn;
         adjx = head->pointer->row + DirR[i];
         adjy = head->pointer->collumn + DirC[i];
-        if (existence(visited, adjx, adjy)) {
-           
-        if(i==0){ U=1;}
-        if(i==1){ R=1;}
-        if(i==2){ D=1;}
-        if(i==3){ L=1;}
-        }
+        if (existence(visited, adjx, adjy)) { 
+            if(i==0) U=1;
+            if(i==1) R=1;
+            if(i==2) D=1;
+            if(i==3) L=1;
+            }
         }
         add_node(head->pointer, U, R, D, L, head->pointer->row, head->pointer->collumn, visited, &tail);
-        
         temp_head=head->next;
         free(head);
         head=temp_head;
@@ -266,14 +263,13 @@ int main(void) {
     if (feof(stdin) == EOF) exit(1);
     if (room[poszoo_x][poszoo_y] == '1' || room[trash_x][trash_y] == '1') exit(1); //checking if the machine or the trash is on top of an obstacle
     if  (&room[poszoo_x][poszoo_y] == &room[trash_x][trash_y]){
-        printf("No steps needed. Zoomba is on the trash");
+        printf("No steps needed. Zoomba is on the trash\n");
         return 0;
     }
    
     char **visited = malloc(dim * sizeof(char*)); //introducing a 2-dimensional array that marks if a cell has been visited or not
     for (int i = 0; i < dim; i++) {
         visited[i] = malloc(dim * sizeof(char));
-        //strcpy(visited[i],room[i]);
         for (int j = 0; j < dim; j++) {
             visited[i][j] = room[i][j];
         }
@@ -281,11 +277,6 @@ int main(void) {
     visited[trash_x][trash_y] = '2';//mark the trash as 2
     visited[poszoo_x][poszoo_y] = '1';//mark zoomba as 1
     find_path(visited,poszoo_x,poszoo_y);
-
-
-
-
-
     for (int i = 0; i < dim; i++) { //freeing the two-dimensional array of the room
         free(visited[i]);
     }
