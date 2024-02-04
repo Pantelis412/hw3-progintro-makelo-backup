@@ -254,7 +254,7 @@ int main(void) {
             room[i] = malloc(dim * sizeof(char));
             if (room[i] == NULL) exit(1);
         }
-    char * temp=(char *)malloc(dim*sizeof(char));
+    char *temp=malloc(dim * sizeof(char));
     for (int i = 0; i < dim; i++) {
         int read = fread(room[i], 1, dim, stdin);
         if (read != dim) exit(1);
@@ -285,5 +285,6 @@ int main(void) {
         free(room[i]);
     }
     free(room);
+    free(temp);
     return 0;
 }
