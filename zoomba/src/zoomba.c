@@ -193,7 +193,7 @@ void find_path(char **visited,int RowZ, int ColZ){
         free(head);
         head=temp_head;
     }
-    if (navigator==NULL)printf("impossible\n");
+    if (navigator==NULL)printf("0\n");
     else{
         char *path=NULL;
         int counter=0;
