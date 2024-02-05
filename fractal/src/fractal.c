@@ -36,21 +36,25 @@ int main(int argc, char **argv) {
     double step;
     if (!(fscanf(comp, "%lf", &step))) exit(1);
     Z z;
-    int count = 0;
-    for (double i = min.imag; i <= max.imag; i+=step) {
+    int counter = 0;
+    for (double i = min.imag; i <= max.imag; i+=step) {  
         z.now.imag = i;
         for (double j = min.real; j <= max.real; j+=step) {
+            int count = 0;
             z.now.real = j;
-            do {
-
-            } while (imabs(z.now.imag, z.now.real) >= 10e-6 && count < 1000);
+            // do {
+            //     count ++;
+            // } while (imabs(z.now.imag, z.now.real) >= 10e-6 && count < 1000);
+            counter++;
+            if (counter == 10e6) break;
             if (count == 1000) {
-                printf("impossible\t");
+                printf("incomplete\t");
                 continue;
             }
-            printf("%.2lf %.2lfi\t", z.now.imag, z.now.real);
+            printf("%.2lf %.2lfi\t", z.now.real, z.now.imag);
         }
         printf("\n");
+        if (counter == 10e6) break;
     }
     fclose(comp);
     return 0;
