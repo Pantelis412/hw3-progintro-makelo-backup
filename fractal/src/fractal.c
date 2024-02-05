@@ -3,6 +3,7 @@
 #include <math.h>
 #include "complexlib.h"
 
+//struct to depict the real and imaginary numbers
 typedef struct {
     double real;
     double imag;
