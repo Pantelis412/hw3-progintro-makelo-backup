@@ -16,80 +16,122 @@ typedef struct {
 
 double fr(Z z, double *coef, int degree) {
     int k = 0;
-    int sum = 0;
+    complex sum;
+    sum.real = 0;
+    complex s;
     while (degree - k > 0) {
-        int s = 0;
-        for (int i = 1; i < degree - k; i++) {
-            if (s == 0) s += z.now.real;
-            else s *= z.now.real;
+        s.real = 0;
+        s.imag = 0;
+        for (int i = 1; i <= degree - k; i++) {
+            if (s.real == 0 || s.imag == 0) {
+                s.real += remul(z.next.real, z.next.imag, z.next.real, z.next.imag);
+                s.imag += immul(z.next.real, z.next.imag, z.next.real, z.next.imag);
+            } else {
+                s.real *= remul(s.real, s.imag, z.next.real, z.next.imag);
+                s.imag *= immul(s.real, s.imag, z.next.real, z.next.imag);
+            }
         }
-        s *= coef[degree - k];
+        if (degree - k == 1) {
+            s.real += add(s.real, z.now.real);
+            s.imag += add(s.imag, z.now.imag);
+        }
+        if (coef[degree - k] != 0) s.real *= coef[degree - k];
         k++;
-        sum += s;
+        sum.real += s.real;
     }
-    sum += coef[0];
-    return sum;
+    sum.real += coef[0];
+    return sum.real;
 }
 
 double dfr(Z z, double *coef, int degree) {
-    int l = 0;
     for (int i = degree; i >= 1; i--) {
-        coef[i] = (degree - l) * coef[i];
-        l++;
+        coef[i] *= i;
     }
     int k = 1;
-    int sum = 0;
-    while (degree - k > 0) {
-        int s = 0;
-        for (int i = 1; i < degree - k; i++) {
-            if (s == 0) s += z.now.real;
-            s *= z.now.real;
+    complex sum;
+    sum.real = 0;
+    complex s;
+     while (degree - k > 1) {
+        s.real = 0;
+        s.imag = 0;
+       for (int i = 1; i <= degree - k; i++) {
+            if (s.real == 0 || s.imag == 0) {
+                s.real += remul(z.next.real, z.next.imag, z.next.real, z.next.imag);
+                s.imag += immul(z.next.real, z.next.imag, z.next.real, z.next.imag);
+            } else {
+                s.real *= remul(s.real, s.imag, z.next.real, z.next.imag);
+                s.imag *= immul(s.real, s.imag, z.next.real, z.next.imag);
+            }
         }
-        s *= coef[degree - k];
+        if (degree - k == 1) {
+            s.real += add(s.real, z.now.real);
+            s.imag += add(s.imag, z.now.imag);
+        }
+        if (coef[degree - k + 1] != 0) s.real *= coef[degree - k + 1];
         k++;
-        sum += s;
+        sum.real += s.real;
     }
-    sum += coef[1];
-    return sum;
+    sum.real += coef[1];
+    return sum.real;
 }
 
 double fi(Z z, double *coef, int degree) {
     int k = 0;
-    int sum = 0;
-    while (degree - k > 0) {
-        int s = 0;
-        for (int i = 1; i < degree - k; i++) {
-            if (s == 0) s += z.now.imag;
-            else s *= z.now.imag;
+    complex sum;
+    sum.imag = 0;
+    complex s;
+     while (degree - k > 0) {
+        s.real = 0;
+        s.imag = 0;
+        for (int i = 1; i <= degree - k; i++) {
+            if (s.real == 0 || s.imag == 0) {
+                s.real += remul(z.next.real, z.next.imag, z.next.real, z.next.imag);
+                s.imag += immul(z.next.real, z.next.imag, z.next.real, z.next.imag);
+            } else {
+                s.real *= remul(s.real, s.imag, z.next.real, z.next.imag);
+                s.imag *= immul(s.real, s.imag, z.next.real, z.next.imag);
+            }
         }
-        s *= coef[degree - k];
+        if (degree - k == 1) {
+            s.real += add(s.real, z.now.real);
+            s.imag += add(s.imag, z.now.imag);
+        }
+        if (coef[degree - k] != 0) s.imag *= coef[degree - k];
         k++;
-        sum += s;
+        sum.imag += s.imag;
     }
-    sum += coef[0];
-    return sum;
+    return sum.imag;
 }
 
 double dfi(Z z, double *coef, int degree) {
-    int l = 0;
     for (int i = degree; i >= 1; i--) {
-        coef[i] = (degree - l) * coef[i];
-        l++;
+        coef[i] *= i;
     }
     int k = 1;
-    int sum = 0;
+    complex sum;
+    sum.imag = 0;
+    complex s;
     while (degree - k > 0) {
-        int s = 0;
-        for (int i = 1; i < degree - k; i++) {
-            if (s == 0) s += z.now.imag;
-            else s *= z.now.imag;
+        s.real = 0;
+        s.imag = 0;
+        for (int i = 1; i <= degree - k; i++) {
+            if (s.real == 0 || s.imag == 0) {
+                s.real += remul(z.next.real, z.next.imag, z.next.real, z.next.imag);
+                s.imag += immul(z.next.real, z.next.imag, z.next.real, z.next.imag);
+            } else {
+                s.real *= remul(s.real, s.imag, z.next.real, z.next.imag);
+                s.imag *= immul(s.real, s.imag, z.next.real, z.next.imag);
+            }
         }
-        s *= coef[degree - k];
+        if (degree - k == 1) {
+            s.real += add(s.real, z.now.real);
+            s.imag += add(s.imag, z.now.imag);
+        }
+        if (coef[degree - k + 1] != 0) s.imag *= coef[degree - k + 1];
         k++;
-        sum += s;
+        sum.imag += s.imag;
     }
-    sum += coef[1];
-    return sum;
+    return sum.imag;
 }
 
 int main(int argc, char **argv) {

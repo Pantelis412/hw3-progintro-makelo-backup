@@ -3,12 +3,16 @@
 #include <math.h>
 #include "complexlib.h"
 
-double remul(double a, double b) {
-    return (pow(a, 2)) - (pow(b, 2));
+double add(double a, double b) {
+    return (a + b);
 }
 
-double immul(double a, double b) {
-    return (2 * a * b);
+double remul(double a, double b, double c, double d) {
+    return (a * c) - (b * d);
+}
+
+double immul(double a, double b, double c, double d) {
+    return (a * d + b * c);
 }
 
 double rediv(double a, double b, double c, double d) {
