@@ -14,6 +14,22 @@ typedef struct {
     complex now;
 }Z;
 
+void newton_raphson(double * coef, double real, double imag, int degree){
+    Z z0,z1;
+    z0.now.real=real;
+    z0.now.imag=imag;
+    z0.next.real=0;
+    z0.next.imag=0;
+    for(int i= degree; i>=0; i--){
+    pow_complex(&z0.now.real, &z0.now.imag, degree-1)/*check if the derivative of polynomial is zero*/
+    degree*coef[degree];
+    }
+    if(z0.next.real==0 && z0.next.imag==0 ){
+        printf("nan\n");
+        return;
+    }
+}
+
 int main(int argc, char **argv) {
     if (argc != 2) {
         fprintf(stderr, "Wrong input number. Normal input is of type ./fractal filename\n");
@@ -42,20 +58,22 @@ int main(int argc, char **argv) {
         for (double j = min.real; j <= max.real; j+=step) {
             int count = 0;
             z.now.real = j;
+            newton_raphson(coef, z.now.real, z.now.imag, degree);
             // do {
             //     count ++;
             // } while (imabs(z.now.imag, z.now.real) >= 10e-6 && count < 1000);
-            counter++;
-            if (counter == 10e6) break;
-            if (count == 1000) {
-                printf("incomplete\t");
-                continue;
-            }
-            printf("%.2lf %.2lfi\t", z.now.real, z.now.imag);
+            // counter++;
+            // if (counter == 10e6) break;
+            // if (count == 1000) {
+            //     printf("incomplete\t");
+            //     continue;
+            // }
+            //printf("%.2lf %.2lfi\t", z.now.real, z.now.imag);
         }
         printf("\n");
         if (counter == 10e6) break;
     }
+    
     fclose(comp);
     return 0;
 }
