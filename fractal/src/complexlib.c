@@ -1,24 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "complex.h"
+#include "complexlib.h"
 
-double imadd(double a, double b, double c, double d) {
-    
+double remul(double a, double b) {
+    return (pow(a, 2)) - (pow(b, 2));
 }
 
-double imsub(double a, double b, double c, double d) {
-
+double immul(double a, double b) {
+    return (2 * a * b);
 }
 
-double immul(double a, double b, double c, double d) {
-    return (a * c - b * d) + (a * d + b * c);
+double rediv(double a, double b, double c, double d) {
+    return (a * c + b * d) / (pow(c, 2) + pow(d, 2));
 }
 
-double imdiv(double a, double b, double c, double d) {
-
+double imdiv(double a, double b, double c, double d){
+    return (b * c - a * d) / (pow(c, 2) + pow(d, 2));
 }
 
-double imabs(double a, double b) {
-    return sqrt(pow(a, 2) + pow(b, 2));
+double imabs(double a, double b, double c, double d) {
+    return sqrt(pow(a, 2) + pow(b, 2)) - sqrt(pow(c, 2) + pow(d, 2));
 }

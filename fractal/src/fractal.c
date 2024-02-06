@@ -14,6 +14,84 @@ typedef struct {
     complex now;
 }Z;
 
+double fr(Z z, double *coef, int degree) {
+    int k = 0;
+    int sum = 0;
+    while (degree - k > 0) {
+        int s = 0;
+        for (int i = 1; i < degree - k; i++) {
+            if (s == 0) s += z.now.real;
+            else s *= z.now.real;
+        }
+        s *= coef[degree - k];
+        k++;
+        sum += s;
+    }
+    sum += coef[0];
+    return sum;
+}
+
+double dfr(Z z, double *coef, int degree) {
+    int l = 0;
+    for (int i = degree; i >= 1; i--) {
+        coef[i] = (degree - l) * coef[i];
+        l++;
+    }
+    int k = 1;
+    int sum = 0;
+    while (degree - k > 0) {
+        int s = 0;
+        for (int i = 1; i < degree - k; i++) {
+            if (s == 0) s += z.now.real;
+            s *= z.now.real;
+        }
+        s *= coef[degree - k];
+        k++;
+        sum += s;
+    }
+    sum += coef[1];
+    return sum;
+}
+
+double fi(Z z, double *coef, int degree) {
+    int k = 0;
+    int sum = 0;
+    while (degree - k > 0) {
+        int s = 0;
+        for (int i = 1; i < degree - k; i++) {
+            if (s == 0) s += z.now.imag;
+            else s *= z.now.imag;
+        }
+        s *= coef[degree - k];
+        k++;
+        sum += s;
+    }
+    sum += coef[0];
+    return sum;
+}
+
+double dfi(Z z, double *coef, int degree) {
+    int l = 0;
+    for (int i = degree; i >= 1; i--) {
+        coef[i] = (degree - l) * coef[i];
+        l++;
+    }
+    int k = 1;
+    int sum = 0;
+    while (degree - k > 0) {
+        int s = 0;
+        for (int i = 1; i < degree - k; i++) {
+            if (s == 0) s += z.now.imag;
+            else s *= z.now.imag;
+        }
+        s *= coef[degree - k];
+        k++;
+        sum += s;
+    }
+    sum += coef[1];
+    return sum;
+}
+
 int main(int argc, char **argv) {
     if (argc != 2) {
         fprintf(stderr, "Wrong input number. Normal input is of type ./fractal filename\n");
@@ -37,21 +115,30 @@ int main(int argc, char **argv) {
     if (!(fscanf(comp, "%lf", &step))) exit(1);
     Z z;
     int counter = 0;
+    int count = 0;
     for (double i = min.imag; i <= max.imag; i+=step) {  
         z.now.imag = i;
         for (double j = min.real; j <= max.real; j+=step) {
-            int count = 0;
+            count = 0;
             z.now.real = j;
-            // do {
-            //     count ++;
-            // } while (imabs(z.now.imag, z.now.real) >= 10e-6 && count < 1000);
+            do {
+                z.next.real = z.now.real;
+                z.next.imag = z.now.imag;
+                if (dfr(z, coef, degree) != 0 || dfi(z, coef, degree) != 0) {
+                z.now.real = z.now.real - rediv(fr(z, coef, degree), dfr(z, coef, degree), fi(z, coef, degree), dfi(z, coef, degree));
+                z.now.imag = z.now.imag - imdiv(fi(z, coef, degree), dfi(z, coef, degree), fi(z, coef, degree), dfi(z, coef, degree));
+                } else break;
+                count ++;
+            } while (imabs(z.now.imag, z.now.real, z.next.imag, z.next.real) >= 10e-6 && count < 1000);
             counter++;
             if (counter == 10e6) break;
             if (count == 1000) {
                 printf("incomplete\t");
                 continue;
             }
-            printf("%.2lf %.2lfi\t", z.now.real, z.now.imag);
+            if (dfr(z, coef, degree) != 0 || dfi(z, coef, degree) != 0) {
+                printf("%.2lf %.2lfi\t", z.next.real, z.next.imag);
+            } else printf("nan\t");
         }
         printf("\n");
         if (counter == 10e6) break;
