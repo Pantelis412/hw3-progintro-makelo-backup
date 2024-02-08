@@ -1,8 +1,6 @@
 #ifndef COMPLEXLIB_H
 #define COMPLEXLIB_H
 
-double add(double a, double b);
-
 double remul(double a, double b, double c, double d);
 
 double immul(double a, double b, double c, double d);
