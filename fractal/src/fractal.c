@@ -164,14 +164,12 @@ int main(int argc, char **argv) {
             count = 0;
             z.n.real = i;
             z.n.imag = j;
-            //printf("%.2lf %.2lf\t", z.o.real, z.o.imag);
             do {
                 z.o.real = z.n.real;
                 z.o.imag = z.n.imag;
                 if((derfunre(z, coef, degree) == 0 && derfunim(z, coef, degree) == 0)) break;
                 z.n.real -= rediv(funre(z, coef, degree), funim(z, coef, degree), derfunre(z, coef, degree), derfunim(z, coef, degree));
                 z.n.imag -= imdiv(funre(z, coef, degree), funim(z, coef, degree), derfunre(z, coef, degree), derfunim(z, coef, degree));
-                //printf("%.2lf %.2lf\t", z.o.real, z.o.imag);
                 count ++;
             } while (imabs(z.o.real, z.o.imag, z.n.real, z.n.imag) >= 10e-6 && count < 1000);
             counter++;

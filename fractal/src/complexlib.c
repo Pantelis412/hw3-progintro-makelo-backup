@@ -12,7 +12,6 @@ double immul(double a, double b, double c, double d) {
 }
 
 double rediv(double a, double b, double c, double d) {
-    //printf("%.2lf %.2lf %.2lf %.2lf\t", a, b, c, d);
     return ((a * c + b * d) / (c * c + d * d));
 }
 
