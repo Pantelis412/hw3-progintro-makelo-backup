@@ -159,19 +159,13 @@ double derfunim(Z z, double *coef, int degree) {
 }
 
 int main(int argc, char **argv) {
-    if (argc != 4) {
-        fprintf(stderr, "Wrong input number. Normal input is of type ./fractal filename\n");
+    if (argc != 2 && argc != 4) {
+        fprintf(stderr, "Wrong input number. Normal input is of type ./fractal filename or ./fractal filename -g output.bmp\n");
         exit(1);
     } 
     FILE *comp = fopen(argv[1], "r");
     if (comp == NULL) {
         fprintf(stderr, "file could not be opened\n");
-        exit(1);
-    }
-    FILE *out = fopen(argv[3], "w");
-    if (out == NULL) {
-        fprintf(stderr, "the file could neither be opened nor created\n");
-        fclose(out);
         exit(1);
     }
     int degree;
@@ -185,30 +179,44 @@ int main(int argc, char **argv) {
     if (!(fscanf(comp, "%lf %lf %lf %lf", &min.real, &min.imag, &max.real, &max.imag))) exit(1); //getting the edges of the real and the imaginary part in the function
     double step;
     if (!(fscanf(comp, "%lf", &step))) exit(1); //getting the "depth" that the newton-raphson method searches for roots
-    char *header = malloc(54 * sizeof(char));
-    header[0] = 'B';
-    header[1] = 'M';
-    BMPhead info;
-    info.total = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)) + 54;
-    header[ALLBYTES] = *(char *)&info.total;
-    info.offset = 54;
-    header[OFFSET] = *(char *)&info.offset;
-    info.headsize = 40;
-    header[HEADSIZE] = *(char *)&info.headsize;
-    info.width = ceil((max.imag - min.imag) / step);
-    header[WIDTH] = *(char *)&info.width;
-    info.height = ceil((max.real - min.real) / step);
-    header[HEIGHT] = *(char *)&info.height;
-    info.palet = 1;
-    header[PALET] = *(char *)&info.palet;
-    info.bits = 24;
-    header[BITSPERPIX] = *(char *)&info.bits;
-    info.pixbytes = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step));
-    header[PIXBYTES] = *(char *)&info.pixbytes;
-    info.xppm = 96;
-    header[XRES] = *(char *)&info.xppm;
-    info.yppm = 96;
-    header[YRES] = *(char *)&info.yppm;
+    if (argc == 4) {
+        FILE *out = fopen(argv[3], "w");
+        if (out == NULL) {
+            fprintf(stderr, "the file could neither be opened nor created\n");
+            fclose(out);
+            exit(1);
+        }
+        unsigned char *header = malloc(54 * sizeof(char));
+        header[0] = 'B';
+        header[1] = 'M';
+        BMPhead info;
+        info.total = 300;
+        header[ALLBYTES] = *(char *)&info.total;
+        // if (info.total >= 256) {
+        //     header[ALLBYTES] = *(char *)&info.total;
+        //     double temp = info.total - 255;
+        //     info.total -= temp;
+        //     header[ALLBYTES + 1] = *(char *)&info.total;
+        // }   
+        info.offset = 54;
+        header[OFFSET] = *(char *)&info.offset;
+        info.headsize = 40;
+        header[HEADSIZE] = *(char *)&info.headsize;
+        info.width = ceil((max.imag - min.imag) / step);
+        header[WIDTH] = *(char *)&info.width;
+        info.height = ceil((max.real - min.real) / step);
+        header[HEIGHT] = *(char *)&info.height;
+        info.palet = 1;
+        header[PALET] = *(char *)&info.palet;
+        info.bits = 24;
+        header[BITSPERPIX] = *(char *)&info.bits;
+        info.pixbytes = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step));
+        header[PIXBYTES] = *(char *)&info.pixbytes;
+        info.xppm = 96;
+        header[XRES] = *(char *)&info.xppm;
+        info.yppm = 96;
+        header[YRES] = *(char *)&info.yppm;
+    }
     Z z;
     int counter = 0; //counter for total complex numbers that have run through the check
     int count = 0; //counter for total times every complex number stays in the loop
