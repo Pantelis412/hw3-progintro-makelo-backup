@@ -2,6 +2,16 @@
 #include <stdlib.h>
 #include <math.h>
 #include "complexlib.h"
+#define ALLBYTES 2
+#define OFFSET 10
+#define HEADSIZE 14
+#define WIDTH 18
+#define HEIGHT 22
+#define PALET 26
+#define BITSPERPIX 28
+#define PIXBYTES 34
+#define XRES 38
+#define YRES 42
 
 //struct to depict the real and imaginary numbers
 typedef struct {
@@ -13,7 +23,20 @@ typedef struct {
 typedef struct {
     complex n;
     complex o;
-}Z;
+} Z;
+
+typedef struct {
+    int total;
+    int offset;
+    int headsize;
+    int width;
+    int height;
+    unsigned char palet;
+    unsigned char bits;
+    int pixbytes;
+    int xppm;
+    int yppm;
+} BMPhead;
 
 //calculating the real part of the function (following the same steps in function funim so there will be minimal comments there)
 double funre(Z z, double *coef, int degree) {
@@ -136,13 +159,19 @@ double derfunim(Z z, double *coef, int degree) {
 }
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
+    if (argc != 4) {
         fprintf(stderr, "Wrong input number. Normal input is of type ./fractal filename\n");
         exit(1);
     } 
     FILE *comp = fopen(argv[1], "r");
     if (comp == NULL) {
         fprintf(stderr, "file could not be opened\n");
+        exit(1);
+    }
+    FILE *out = fopen(argv[3], "w");
+    if (out == NULL) {
+        fprintf(stderr, "the file could neither be opened nor created\n");
+        fclose(out);
         exit(1);
     }
     int degree;
@@ -156,6 +185,30 @@ int main(int argc, char **argv) {
     if (!(fscanf(comp, "%lf %lf %lf %lf", &min.real, &min.imag, &max.real, &max.imag))) exit(1); //getting the edges of the real and the imaginary part in the function
     double step;
     if (!(fscanf(comp, "%lf", &step))) exit(1); //getting the "depth" that the newton-raphson method searches for roots
+    char *header = malloc(54 * sizeof(char));
+    header[0] = 'B';
+    header[1] = 'M';
+    BMPhead info;
+    info.total = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)) + 54;
+    header[ALLBYTES] = *(char *)&info.total;
+    info.offset = 54;
+    header[OFFSET] = *(char *)&info.offset;
+    info.headsize = 40;
+    header[HEADSIZE] = *(char *)&info.headsize;
+    info.width = ceil((max.imag - min.imag) / step);
+    header[WIDTH] = *(char *)&info.width;
+    info.height = ceil((max.real - min.real) / step);
+    header[HEIGHT] = *(char *)&info.height;
+    info.palet = 1;
+    header[PALET] = *(char *)&info.palet;
+    info.bits = 24;
+    header[BITSPERPIX] = *(char *)&info.bits;
+    info.pixbytes = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step));
+    header[PIXBYTES] = *(char *)&info.pixbytes;
+    info.xppm = 96;
+    header[XRES] = *(char *)&info.xppm;
+    info.yppm = 96;
+    header[YRES] = *(char *)&info.yppm;
     Z z;
     int counter = 0; //counter for total complex numbers that have run through the check
     int count = 0; //counter for total times every complex number stays in the loop
