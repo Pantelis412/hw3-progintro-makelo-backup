@@ -222,6 +222,8 @@ int main(int argc, char **argv) {
             exit(1);
         }
         unsigned char *header = malloc(54 * sizeof(unsigned char));
+        if (header == NULL) exit(1);
+        for (int i = 0; i < 54; i++) header[i] = '0';
         header[0] = 'B';
         header[1] = 'M';
         BMPhead info;
@@ -261,6 +263,11 @@ int main(int argc, char **argv) {
                 if(pixel_array[i][j] == NULL) exit(1);
             }
         }
+    for (int i = 0; i < ceil((max.real - min.real) / step); i ++) {
+        for (int j = 0; j < ceil((max.imag - min.imag) / step); j ++) {
+            for (int a = 0; a < 3; a++) pixel_array[i][j][a] = '0';
+        }
+    }
     unsigned char **colors = malloc(degree * sizeof(unsigned char*));
         if (colors == NULL) exit(1);
         for (int i = 0; i < degree; i++) {
@@ -372,7 +379,6 @@ int main(int argc, char **argv) {
             } else {
                 printf("incomplete\t");
                 if (argc == 4) {
-                    perror("hi");
                     pixel_array[height][width][0] = 255;
                     pixel_array[height][width][1] = 255;
                     pixel_array[height][width][2] = 255;
