@@ -284,9 +284,11 @@ int main(int argc, char **argv) {
             if (count_cur <= 1000) {
                 if((derfunre(z, coef, degree) == 0.0 && derfunim(z, coef, degree) == 0.0)) {
                     printf("nan\t");
-                    pixel_array[(int)i][(int)i][0] = 0;
-                    pixel_array[(int)i][(int)j][1] = 0;
-                    pixel_array[(int)i][(int)j][2] = 0;
+                    if (argc == 4) {
+                        pixel_array[(int)i][(int)i][0] = 0;
+                        pixel_array[(int)i][(int)j][1] = 0;
+                        pixel_array[(int)i][(int)j][2] = 0;
+                    }
                 } else {
                     if (z.n.real >= 0 && z.n.imag >= 0) printf("+%.2lf+%.2lfi\t", z.n.real, z.n.imag);
                     else if (z.n.real >= 0) printf("+%.2lf%.2lfi\t", z.n.real, z.n.imag);
@@ -298,9 +300,11 @@ int main(int argc, char **argv) {
                 }
             } else {
                 printf("incomplete\t");
-                pixel_array[(int)i][(int)i][0] = 255;
-                pixel_array[(int)i][(int)j][1] = 255;
-                pixel_array[(int)i][(int)j][2] = 255;
+                if (argc == 4) {
+                    pixel_array[(int)i][(int)i][0] = 255;
+                    pixel_array[(int)i][(int)j][1] = 255;
+                    pixel_array[(int)i][(int)j][2] = 255;
+                }
             }
         }
         printf("\n");
