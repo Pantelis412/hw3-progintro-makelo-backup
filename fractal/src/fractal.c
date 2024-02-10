@@ -158,6 +158,21 @@ double derfunim(Z z, double *coef, int degree) {
     return sum;
 }
 
+void check_colors(Z z, char **pixel_array[], int height, int width, double *roots, int *num_roots) {
+    if ((*num_roots) == 0) {
+        (*num_roots) ++;
+        roots = realloc(roots, (*num_roots) * 2 * sizeof(complex));
+        roots[0] = z.n.real;
+        roots[1] = z.n.imag;
+
+    }
+    for (int i = 0; i <= (*num_roots) * 2; i += 2) {
+        if (z.n.real == roots[i] && z.n.imag == roots[i + 1]) {
+
+        }
+    }
+}
+
 int main(int argc, char **argv) {
     if (argc != 2 && argc != 4) {
         fprintf(stderr, "Wrong input number. Normal input is of type ./fractal filename or ./fractal filename -g output.bmp\n");
@@ -186,43 +201,74 @@ int main(int argc, char **argv) {
             fclose(out);
             exit(1);
         }
-        unsigned char *header = malloc(54 * sizeof(char));
+        unsigned char *header = malloc(54 * sizeof(unsigned char));
         header[0] = 'B';
         header[1] = 'M';
         BMPhead info;
-        info.total = 300;
-        header[ALLBYTES] = *(char *)&info.total;
-        // if (info.total >= 256) {
-        //     header[ALLBYTES] = *(char *)&info.total;
-        //     double temp = info.total - 255;
-        //     info.total -= temp;
-        //     header[ALLBYTES + 1] = *(char *)&info.total;
-        // }   
+        info.total = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)) + 54;
+        header[ALLBYTES] = info.total;
         info.offset = 54;
-        header[OFFSET] = *(char *)&info.offset;
+        header[OFFSET] = info.offset;
         info.headsize = 40;
-        header[HEADSIZE] = *(char *)&info.headsize;
+        header[HEADSIZE] = info.headsize;
         info.width = ceil((max.imag - min.imag) / step);
-        header[WIDTH] = *(char *)&info.width;
+        header[WIDTH] = info.width;
         info.height = ceil((max.real - min.real) / step);
-        header[HEIGHT] = *(char *)&info.height;
+        header[HEIGHT] = info.height;
         info.palet = 1;
-        header[PALET] = *(char *)&info.palet;
+        header[PALET] = *(unsigned char *)&info.palet;
         info.bits = 24;
-        header[BITSPERPIX] = *(char *)&info.bits;
+        header[BITSPERPIX] = *(unsigned char *)&info.bits;
         info.pixbytes = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step));
-        header[PIXBYTES] = *(char *)&info.pixbytes;
+        header[PIXBYTES] = info.pixbytes;
         info.xppm = 96;
-        header[XRES] = *(char *)&info.xppm;
+        header[XRES] = info.xppm;
         info.yppm = 96;
-        header[YRES] = *(char *)&info.yppm;
+        header[YRES] = info.yppm;
+        char ***pixel_array = malloc(info.height * sizeof(char**));
+        if (pixel_array == NULL) exit(1);
+        for (int i = 0; i < info.height; i++) {
+            pixel_array[i] = malloc(info.width * sizeof(char*));
+            if(pixel_array[i] == NULL) exit(1);
+            for (int j = 0; j < info.width; j++) {
+                pixel_array[i][j] = malloc(3 * sizeof(char));
+                if(pixel_array[i][j] == NULL) exit(1);
+            }
+        }
+    } 
+    unsigned char ***pixel_array = malloc(ceil((max.real - min.real) / step) * sizeof(unsigned char**));
+        if (pixel_array == NULL) exit(1);
+        for (int i = 0; i < ceil((max.real - min.real) / step); i++) {
+            pixel_array[i] = malloc(ceil((max.imag - min.imag) / step) * sizeof(unsigned char*));
+            if(pixel_array[i] == NULL) exit(1);
+            for (int j = 0; j < ceil((max.imag - min.imag) / step); j++) {
+                pixel_array[i][j] = malloc(3 * sizeof(unsigned char));
+                if(pixel_array[i][j] == NULL) exit(1);
+            }
+        }
+    unsigned char **colors = malloc((degree + 2) * sizeof(unsigned char*));
+        if (colors == NULL) exit(1);
+        for (int i = 0; i < degree + 2; i++) {
+            colors[i] = malloc(3 * sizeof(unsigned char));
+        }
+    int k = 0;
+    if (k + 1 <= degree) {
+        colors[0][0] = 255;
+        colors[0][1] = 0;
+        colors[0][2] = 255;
+        k++;
+        if (k + 1 <= degree) {
+
+        }
     }
     Z z;
-    int counter = 0; //counter for total complex numbers that have run through the check
-    int count = 0; //counter for total times every complex number stays in the loop
+    double *roots = NULL;
+    int num_roots = 0;
+    int count_rep = 0; //counter for total complex numbers that have run through the check
+    int count_cur = 0; //counter for total times every complex number stays in the loop
     for (double i = min.real; i < max.real; i+=step) {  
         for (double j = min.imag; j < max.imag; j+=step) {
-            count = 0;
+            count_cur = 0;
             z.n.real = i;
             z.n.imag = j;
             do {
@@ -231,23 +277,34 @@ int main(int argc, char **argv) {
                 if((derfunre(z, coef, degree) == 0 && derfunim(z, coef, degree) == 0)) break;
                 z.n.real -= rediv(funre(z, coef, degree), funim(z, coef, degree), derfunre(z, coef, degree), derfunim(z, coef, degree));
                 z.n.imag -= imdiv(funre(z, coef, degree), funim(z, coef, degree), derfunre(z, coef, degree), derfunim(z, coef, degree));
-                count ++;
-            } while (imabs(z.o.real, z.o.imag, z.n.real, z.n.imag) >= 10e-6 && count < 1000);
-            counter++;
-            if (counter == 10e6) break;
-            if (count != 1000) {
+                count_cur ++;
+            } while (imabs(z.o.real, z.o.imag, z.n.real, z.n.imag) >= 10e-6 && count_cur <= 1000);
+            count_rep++;
+            if (count_rep == 10e6) break;
+            if (count_cur <= 1000) {
                 if((derfunre(z, coef, degree) == 0.0 && derfunim(z, coef, degree) == 0.0)) {
                     printf("nan\t");
+                    pixel_array[(int)i][(int)i][0] = 0;
+                    pixel_array[(int)i][(int)j][1] = 0;
+                    pixel_array[(int)i][(int)j][2] = 0;
                 } else {
                     if (z.n.real >= 0 && z.n.imag >= 0) printf("+%.2lf+%.2lfi\t", z.n.real, z.n.imag);
                     else if (z.n.real >= 0) printf("+%.2lf%.2lfi\t", z.n.real, z.n.imag);
                     else if (z.n.imag >= 0) printf("%.2lf+%.2lfi\t", z.n.real, z.n.imag);
                     else printf("%.2lf%.2lfi\t", z.n.real, z.n.imag);
+                    if (argc == 4) {
+                        check_colors(z, pixel_array, i, j, roots, &num_roots);
+                    }
                 }
-            } else printf("incomplete\t");
+            } else {
+                printf("incomplete\t");
+                pixel_array[(int)i][(int)i][0] = 255;
+                pixel_array[(int)i][(int)j][1] = 255;
+                pixel_array[(int)i][(int)j][2] = 255;
+            }
         }
         printf("\n");
-        if (counter == 10e6) break;
+        if (count_rep == 10e6) break;
     }
     fclose(comp);
     return 0;
