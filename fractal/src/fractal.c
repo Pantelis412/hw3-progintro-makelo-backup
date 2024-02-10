@@ -158,38 +158,40 @@ double derfunim(Z z, double *coef, int degree) {
     return sum;
 }
 
-void check_colors(Z z, unsigned char **pixel_array[], int height, int width, double *roots, int *num_roots, unsigned char *colors[]) {
-    perror("hi");
+void check_colors(Z z, unsigned char **pixel_array[], int height, int width, int *roots, int *num_roots, unsigned char *colors[]) {
+    //perror("hello");
+    z.n.real *= 100;
+    z.n.imag *= 100;
     if ((*num_roots) == 0) {
-        printf("%d\n", (*num_roots));
         (*num_roots) ++;
-        printf("%d\n", (*num_roots));
-        roots = realloc(roots, (*num_roots) * 2 * sizeof(complex));
-        roots[0] = z.n.real;
-        roots[1] = z.n.imag;
+        roots[0] = (int)z.n.real;
+        roots[1] = (int)z.n.imag;
         pixel_array[height][width][0] = colors[0][0];
         pixel_array[height][width][1] = colors[0][1];
         pixel_array[height][width][2] = colors[0][2];
     } else {
-        for (int i = 0; i <= (*num_roots) * 2; i += 2) {
-            if (z.n.real == roots[i] && z.n.imag == roots[i + 1]) {
-                perror("ho");
+        //fprintf(stderr, "%.2lf %.2lf\n", z.n.real, z.n.imag);
+        for (int i = 0; i < ((*num_roots) * 2); i += 2) {
+            //perror("for");
+            if ((int)z.n.real == roots[i] && (int)z.n.imag == roots[i + 1]) {
+                //perror("loop");
                 pixel_array[height][width][0] = colors[i/2][0];
                 pixel_array[height][width][1] = colors[i/2][1];
                 pixel_array[height][width][2] = colors[i/2][2];
+                break;
             }
         }
     }
-    perror("ho");
+    //perror("maybe");
     if (pixel_array[height][width][0] == 0 && pixel_array[height][width][1] == 0 && pixel_array[height][width][2] == 0) {
-        perror("ho");
         (*num_roots) ++;
-        roots = realloc(roots, (*num_roots) * 2 * sizeof(complex));
-        roots[((*num_roots) * 2) - 2] = z.n.real;
-        roots[((*num_roots) * 2) - 1] = z.n.imag;
-        pixel_array[height][width][0] = colors[(*num_roots)][0];
-        pixel_array[height][width][1] = colors[(*num_roots)][1];
-        pixel_array[height][width][2] = colors[(*num_roots)][2];
+        //fprintf(stderr, "%d", (*num_roots));
+        roots[((*num_roots) * 2) - 2] = (int)z.n.real;
+        roots[((*num_roots) * 2) - 1] = (int)z.n.imag;
+        //for (int i = 0; i < 8; i++) fprintf(stderr, "%d\t", roots[i]);
+        pixel_array[height][width][0] = colors[(*num_roots) - 1][0];
+        pixel_array[height][width][1] = colors[(*num_roots) - 1][1];
+        pixel_array[height][width][2] = colors[(*num_roots) - 1][2];
     }
 }
 
@@ -214,45 +216,6 @@ int main(int argc, char **argv) {
     if (!(fscanf(comp, "%lf %lf %lf %lf", &min.real, &min.imag, &max.real, &max.imag))) exit(1); //getting the edges of the real and the imaginary part in the function
     double step;
     if (!(fscanf(comp, "%lf", &step))) exit(1); //getting the "depth" that the newton-raphson method searches for roots
-    if (argc == 4) {
-        FILE *out = fopen(argv[3], "w");
-        if (out == NULL) {
-            fprintf(stderr, "the file could neither be opened nor created\n");
-            fclose(out);
-            exit(1);
-        }
-        unsigned char *header = malloc(54 * sizeof(unsigned char));
-        if (header == NULL) exit(1);
-        for (int i = 0; i < 54; i++) header[i] = '0';
-        header[0] = 'B';
-        header[1] = 'M';
-        BMPhead info;
-        info.total = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)) + 54;
-        header[ALLBYTES] = info.total;
-        info.offset = 54;
-        header[OFFSET] = info.offset;
-        info.headsize = 40;
-        header[HEADSIZE] = info.headsize;
-        info.width = ceil((max.imag - min.imag) / step);
-        header[WIDTH] = info.width;
-        info.height = ceil((max.real - min.real) / step);
-        header[HEIGHT] = info.height;
-        info.palet = 1;
-        header[PALET] = *(unsigned char *)&info.palet;
-        info.bits = 24;
-        header[BITSPERPIX] = *(unsigned char *)&info.bits;
-        info.pixbytes = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step));
-        header[PIXBYTES] = info.pixbytes;
-        info.xppm = 96;
-        header[XRES] = info.xppm;
-        info.yppm = 96;
-        header[YRES] = info.yppm;
-        // int read = fwrite(header, sizeof(unsigned char), 54, comp);
-        // if (read != 54) {
-        //     fprintf(stderr, "could not read the headers\n");
-        //     exit(1);
-        // }
-    } 
     unsigned char ***pixel_array = malloc(ceil((max.real - min.real) / step) * sizeof(unsigned char**));
         if (pixel_array == NULL) exit(1);
         for (int i = 0; i < ceil((max.real - min.real) / step); i++) {
@@ -265,7 +228,7 @@ int main(int argc, char **argv) {
         }
     for (int i = 0; i < ceil((max.real - min.real) / step); i ++) {
         for (int j = 0; j < ceil((max.imag - min.imag) / step); j ++) {
-            for (int a = 0; a < 3; a++) pixel_array[i][j][a] = '0';
+            for (int a = 0; a < 3; a++) pixel_array[i][j][a] = 0;
         }
     }
     unsigned char **colors = malloc(degree * sizeof(unsigned char*));
@@ -338,13 +301,14 @@ int main(int argc, char **argv) {
     //     for (int j = 0; j < degree; j ++) printf("%x\t", colors[i][j]);
     // }
     Z z;
-    double *roots = NULL;
+    int *roots = malloc((degree * 2) * sizeof(int));
     int num_roots = 0;
     int count_rep = 0; //counter for total complex numbers that have run through the check
     int count_cur = 0; //counter for total times every complex number stays in the loop
     int height = 0;
     int width = 0;
     for (double i = min.real; i < max.real; i+=step) {  
+        width = 0;
         for (double j = min.imag; j < max.imag; j+=step) {
             count_cur = 0;
             z.n.real = i;
@@ -391,7 +355,56 @@ int main(int argc, char **argv) {
         if (count_rep == 10e6) break;
     }
     if (argc == 4) {
-        int read = fwrite(pixel_array, sizeof(unsigned char), 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)), comp);
+        FILE *out = fopen(argv[3], "w");
+        if (out == NULL) {
+            fprintf(stderr, "the file could neither be opened nor created\n");
+            fclose(out);
+            exit(1);
+        }
+        unsigned char *header = malloc(54 * sizeof(unsigned char));
+        if (header == NULL) exit(1);
+        for (int i = 0; i < 54; i++) header[i] = 0;
+        header[0] = 'B';
+        header[1] = 'M';
+        BMPhead info;
+        info.total = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)) + 54;
+        header[ALLBYTES] = info.total;
+        info.offset = 54;
+        header[OFFSET] = info.offset;
+        info.headsize = 40;
+        header[HEADSIZE] = info.headsize;
+        info.width = ceil((max.imag - min.imag) / step);
+        printf("%d\n", info.width);
+        header[WIDTH] = info.width;
+        info.height = ceil((max.real - min.real) / step);
+        printf("%d\n", info.height);
+        header[HEIGHT] = info.height;
+        info.palet = 1;
+        header[PALET] = *(unsigned char *)&info.palet;
+        info.bits = 24;
+        header[BITSPERPIX] = *(unsigned char *)&info.bits;
+        info.pixbytes = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step));
+        header[PIXBYTES] = info.pixbytes;
+        info.xppm = 255;
+        header[XRES] = info.xppm;
+        info.yppm = 255;
+        header[YRES] = info.yppm;
+        int read = fwrite(header, sizeof(unsigned char), 54, out);
+        if (read != 54) {
+            fprintf(stderr, "could not read the headers\n");
+            exit(1);
+        }
+        unsigned char *final = malloc(3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)) * sizeof(unsigned char));
+        int final_counter = 0;
+        for (int i = 0; i < ceil((max.real - min.real) / step); i ++) {
+            for (int j = 0; j < ceil((max.imag - min.imag) / step); j ++) {
+                final[final_counter] = pixel_array[i][j][0];
+                final[final_counter + 1] = pixel_array[i][j][1];
+                final[final_counter + 2] = pixel_array[i][j][2];
+                final_counter += 3;
+            }
+        }
+        read = fwrite(final, sizeof(unsigned char), 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)), out);
         if (read != 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step))) {
             fprintf(stderr, "Something went wrong with the pixels\n");
             exit(1);
