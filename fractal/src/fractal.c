@@ -367,8 +367,6 @@ int main(int argc, char **argv) {
         header[0] = 'B';
         header[1] = 'M';
         BMPhead info;
-        info.total = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)) + 54;
-        header[ALLBYTES] = info.total;
         info.offset = 54;
         header[OFFSET] = info.offset;
         info.headsize = 40;
@@ -383,26 +381,51 @@ int main(int argc, char **argv) {
         header[PALET] = *(unsigned char *)&info.palet;
         info.bits = 24;
         header[BITSPERPIX] = *(unsigned char *)&info.bits;
-        info.pixbytes = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step));
-        header[PIXBYTES] = info.pixbytes;
         info.xppm = 255;
         header[XRES] = info.xppm;
         info.yppm = 255;
         header[YRES] = info.yppm;
-        int read = fwrite(header, sizeof(unsigned char), 54, out);
-        if (read != 54) {
-            fprintf(stderr, "could not read the headers\n");
-            exit(1);
-        }
-        unsigned char *final = malloc(3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)) * sizeof(unsigned char));
+        int pad = 4 - (int)(3 * ceil((max.imag - min.imag) / step)) % 4;
+        info.total = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)) + 54 + (ceil(max.real - min.real) / step) * pad;
+        header[ALLBYTES] = info.total;
+        info.pixbytes = 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)) + (ceil(max.real - min.real) / step) * pad;
+        header[PIXBYTES] = info.pixbytes;
+        unsigned char *final = malloc(3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step) + (ceil(max.real - min.real) / step) * pad) * sizeof(unsigned char));
         int final_counter = 0;
+        int flag = 0;
         for (int i = 0; i < ceil((max.real - min.real) / step); i ++) {
             for (int j = 0; j < ceil((max.imag - min.imag) / step); j ++) {
+                if (pad != 0 && flag == 1) {
+                    if (pad == 1) {
+                        final[final_counter] = 0;
+                        final_counter ++;
+                    } else if (pad == 2) {
+                        final[final_counter] = 0;
+                        final[final_counter + 1] = 0;
+                        final_counter +=2;
+                    } else if (pad == 3) {
+                        final[final_counter] = 0;
+                        final[final_counter + 1] = 0;
+                        final[final_counter + 2] = 0;
+                        final_counter +=3;
+                    }
+                }
                 final[final_counter] = pixel_array[i][j][0];
                 final[final_counter + 1] = pixel_array[i][j][1];
                 final[final_counter + 2] = pixel_array[i][j][2];
                 final_counter += 3;
+                flag = 0;
             }
+            flag = 1;
+        }
+        for (int i = 0; i < final_counter; i++) {
+            printf("%x\t", final[i]);
+            if (i % (int)(3 * ceil((max.imag - min.imag) / step)) == 0 && i != 0) printf("\n");
+        }
+        int read = fwrite(header, sizeof(unsigned char), 54, out);
+        if (read != 54) {
+            fprintf(stderr, "could not read the headers\n");
+            exit(1);
         }
         read = fwrite(final, sizeof(unsigned char), 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step)), out);
         if (read != 3 * (ceil((max.real - min.real) / step) * ceil((max.imag - min.imag) / step))) {
