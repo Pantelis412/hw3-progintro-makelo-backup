@@ -27,6 +27,7 @@ int existence(char **visited, int h, int v) {// horizontal, vertical
     else if(visited[h][v]=='1')return 0;
     else return 1;
 }
+//we create the nodes of the tree that are free around the one we are currently processing and add them in the back of the queue 
 void add_node(tree *p, int U, int R, int D, int L, int row, int collumn, char **visited, queue **tail){
     tree *previous;
     previous=p;
@@ -42,8 +43,8 @@ void add_node(tree *p, int U, int R, int D, int L, int row, int collumn, char **
         p->previous=previous;
         p->row=row-1;
         p->collumn=collumn;
-        p->key=visited[p->row][p->collumn];
-        visited[p->row][p->collumn]='1';
+        p->key=visited[p->row][p->collumn];//first we save what was on the tile (trash is '2')
+        visited[p->row][p->collumn]='1';//then we fill this tile of visited array with '1' to be able to know where we have been 
         queue * new_node;
         new_node=(queue*)malloc(sizeof(queue));
         if(new_node==NULL){
@@ -142,6 +143,7 @@ void delete_tree(tree *p){
 }
 
 void find_path(char **visited,int RowZ, int ColZ){
+    //Firstly we allocate memory and create the root of the tree
     tree * root;
     char key=visited[RowZ][ColZ];
     root=(tree*) malloc(sizeof(tree));
@@ -156,7 +158,7 @@ void find_path(char **visited,int RowZ, int ColZ){
     root->collumn=ColZ;
     
     queue *head=NULL, *tail=NULL, *temp_head=NULL;
-    //Firstly we fill the queue with root.
+    //Then, we fill the queue with the root.
     queue * new_node;
     new_node=(queue*)malloc(sizeof(queue));
     if(new_node==NULL){
@@ -168,20 +170,21 @@ void find_path(char **visited,int RowZ, int ColZ){
     new_node->next=NULL;
     int U,R,D,L;
     tree *navigator=NULL;
-    while(head!=NULL){//check_add_and_pop and fill the corresponding pop in visited array with 1 if we didnt find the trash
-        if(head->pointer->key=='2'){
+    //check for the trash in the front of the queue, add the surrounding nodes of the tree in the queue and pop the current node form the queue
+    while(head!=NULL){
+        if(head->pointer->key=='2'){//we check if the head of the queue is the tile with the trash.
             navigator=head->pointer;
             break;
         }
-        U=R=D=L=0;
-        int adjx;
+        U=R=D=L=0;//these letters symbolizes the directions
+        int adjx;//these are temporary variables that respresent the tiles around the one we currently are
         int adjy;
-        for (int i = 0; i < 4; i++) {//to find what positions are free to fill the tree
-        adjx = head->pointer->row;
+        for (int i = 0; i < 4; i++) {
+        adjx = head->pointer->row;//reinitialize in every loop
         adjy = head->pointer->collumn;
-        adjx = head->pointer->row + DirR[i];
+        adjx = head->pointer->row + DirR[i];//checking the tiles up, down, left and right according with these 2 arrays 
         adjy = head->pointer->collumn + DirC[i];
-        if (existence(visited, adjx, adjy)) { 
+        if (existence(visited, adjx, adjy)) { //if the tile is in bounds and is free(not wall)
             if(i==0) U=1;
             if(i==1) R=1;
             if(i==2) D=1;
@@ -189,11 +192,12 @@ void find_path(char **visited,int RowZ, int ColZ){
             }
         }
         add_node(head->pointer, U, R, D, L, head->pointer->row, head->pointer->collumn, visited, &tail);
-        temp_head=head->next;
+        temp_head=head->next;//free the head of the queue(the node we currently processed)
         free(head);
         head=temp_head;
     }
-    if (navigator==NULL)printf("0\n");
+    //we follow the navigator back to the root and then we invert the path
+    if (navigator==NULL)printf("0\n");//impossible
     else{
         char *path=NULL;
         int counter=0;
@@ -203,6 +207,7 @@ void find_path(char **visited,int RowZ, int ColZ){
                 perror("Not available memory\n");
                 exit(1);
             }
+            //we calculate each step of the backtrack based on the positions of the current and the previous nodes of the tree
             if((navigator->previous->collumn)-(navigator->collumn)==1)
                 path[counter]='L';
             else if((navigator->previous->collumn)-(navigator->collumn)==-1)
@@ -215,7 +220,7 @@ void find_path(char **visited,int RowZ, int ColZ){
             navigator=navigator->previous;
         }
         for(int i=counter-1; i>=0; i--){
-            printf("%c",path[i]);
+            printf("%c",path[i]);//we print the back track path invertidly
         }
         printf("\n");
         free(path);
@@ -243,7 +248,7 @@ int main(void) {
     if (!(fscanf(stdin, "%d", &poszoo_y))) exit(1);
     if (!(fscanf(stdin, "%d", &trash_x))) exit(1);
     if (!(fscanf(stdin, "%d", &trash_y))) exit(1);
-    char n;
+    char n;// temporary variable to read the '\n' character
     if (!(fscanf(stdin, "%c", &n))) exit(1);
     if (dim > 10000) exit(1); //checking if the dimensions exceed the allowed boundaries 
     if (poszoo_x >= dim || poszoo_y >= dim || trash_x >= dim || trash_y >= dim) exit(1); //checking if the position of the machine or the trash is out of bounds
@@ -254,7 +259,7 @@ int main(void) {
             room[i] = malloc(dim * sizeof(char));
             if (room[i] == NULL) exit(1);
         }
-    char *temp=malloc(dim * sizeof(char));
+    char *temp=malloc(dim * sizeof(char));//temporary array to store the '\n' characters of the input file
     for (int i = 0; i < dim; i++) {
         int read = fread(room[i], 1, dim, stdin);
         if (read != dim) exit(1);
