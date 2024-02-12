@@ -98,7 +98,7 @@ double derfunre(Z z, double *coef, int degree) {
         k++;
     }
     sum += dercoef[0];
-    free(dercoef);
+    if (dercoef != 0) free(dercoef);
     return sum;
 }
 
@@ -158,7 +158,7 @@ double derfunim(Z z, double *coef, int degree) {
         }
         k++;
     }
-    free(dercoef);
+    if (dercoef != 0) free(dercoef);
     return sum;
 }
 
@@ -218,10 +218,10 @@ int main(int argc, char **argv) {
     int height = floor((max.real - min.real) / step) + 1; //creating the height of the image
     unsigned char ***pixel_array = malloc((height) * sizeof(unsigned char**)); //creating a 3 dimensional pixel array with height width and depth of 3 bytes for each pixel
         if (pixel_array == NULL) exit(1); //checking if allocation is possible on all the dimensions
-        for (int i = 0; i < height + 1; i++) {
+        for (int i = 0; i < height; i++) {
             pixel_array[i] = malloc((width) * sizeof(unsigned char*));
             if(pixel_array[i] == NULL) exit(1);
-            for (int j = 0; j < width + 1; j++) {
+            for (int j = 0; j < width; j++) {
                 pixel_array[i][j] = malloc(3 * sizeof(unsigned char));
                 if(pixel_array[i][j] == NULL) exit(1);
             }
@@ -330,8 +330,6 @@ int main(int argc, char **argv) {
                         pixel_array[height][width][2] = 0;
                     }
                 } else {
-                    if (z.n.real >= -(10e-6)) z.n.real = 0;
-                    if (z.n.imag >= -(10e-6)) z.n.imag = 0;
                     if (z.n.real >= 0 && z.n.imag >= 0) printf("+%.2lf+%.2lfi\t", z.n.real, z.n.imag); //from line 335 to 338, printing out the roots and putting the right signs
                     else if (z.n.real >= 0) printf("+%.2lf%.2lfi\t", z.n.real, z.n.imag);
                     else if (z.n.imag >= 0) printf("%.2lf+%.2lfi\t", z.n.real, z.n.imag);
@@ -392,7 +390,7 @@ int main(int argc, char **argv) {
         int pad = 4 - (int)(3 * width) % 4; //introducing the padding of the picture
         int hex = 0, temp; //introducing two temporary values
         info.total = 3 * height * width + height * pad + 54;
-        if (info.total > 16777216) { //if info.total is greater than 16^6 then you divide it and put it at the first byte, then lower info.total by 16^6 times the amount of times it was divisible by it, then proceed to do the same for every 16^(6-2k) till line 436
+        if (info.total > 16777216) { //if info.total is greater than 16^6 then you divide it and put it at the first byte, then lower info.total by 16^6 times the amount of times it was divisible by it, then proceed to do the same for every 16^(6-2k) till line 435
             temp = info.total / 16777216;
             header[ALLBYTES + hex] = temp;
             hex ++;
