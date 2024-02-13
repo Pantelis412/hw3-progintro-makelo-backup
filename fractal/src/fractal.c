@@ -65,17 +65,14 @@ double funre(Z z, double *coef, int degree) {
          i++) {  // loop that starts from 2, as variables with degree 1 or less
                  // dont have anything to be multiplied by other than their
                  // coefficients
-      s.real = remul(upd.real, upd.imag, z.o.real,
-                     z.o.imag);  // finding the real part of the multiplication
+      s.real = remul(upd.real, upd.imag, z.o.real, z.o.imag);  // finding the real part of the multiplication
                                  // and storing it in a temporary variable
-      s.imag = immul(upd.real, upd.imag, z.o.real,
-                     z.o.imag);  // this time finding the imaginary part and
+      s.imag = immul(upd.real, upd.imag, z.o.real, z.o.imag);  // this time finding the imaginary part and
                                  // storing. The reason I need the temps is
                                  // because else the newly updated value would
                                  // go into the immul() instead of the old one
       upd.real = s.real;  // updating the real variable with the value of temp
-      upd.imag =
-          s.imag;  // updating the imaginary variable with the value of temp
+      upd.imag = s.imag;  // updating the imaginary variable with the value of temp
     }
     upd.real *= coef[degree - k];  // updating the real and imaginary values
                                    // with their according coefficients
@@ -375,23 +372,16 @@ int main(int argc, char **argv) {
         if ((derfunre(z, coef, degree) == 0 && derfunim(z, coef, degree) == 0))
           break;  // checking if the derivates are zero (division by 0)
         z.n.real -=
-            rediv(funre(z, coef, degree), funim(z, coef, degree),
-                  derfunre(z, coef, degree),
-                  derfunim(z, coef,
-                           degree));  // implementing the newton raphson method
+            rediv(funre(z, coef, degree), funim(z, coef, degree), derfunre(z, coef, degree), derfunim(z, coef, degree));  // implementing the newton raphson method
                                       // for the real and the imaginary part
-        z.n.imag -= imdiv(funre(z, coef, degree), funim(z, coef, degree),
-                          derfunre(z, coef, degree), derfunim(z, coef, degree));
+        z.n.imag -= imdiv(funre(z, coef, degree), funim(z, coef, degree), derfunre(z, coef, degree), derfunim(z, coef, degree));
         count_cur++;
-      } while (imabs(z.o.real, z.o.imag, z.n.real, z.n.imag) >= 10e-6 &&
-               count_cur <= 1000);  // checking if the conditions are met
+      } while (imabs(z.o.real, z.o.imag, z.n.real, z.n.imag) >= 10e-6 && count_cur <= 1000);  // checking if the conditions are met
       count_rep++;
       if (count_rep == 10e6)
         break;  // if the repetitons reach the 10^6 then the loops stop
       if (count_cur <= 1000) {
-        if ((derfunre(z, coef, degree) == 0 &&
-             derfunim(z, coef, degree) ==
-                 0)) {  // if the derivatives are zero then no root could be
+        if ((derfunre(z, coef, degree) == 0 && derfunim(z, coef, degree) == 0)) {  // if the derivatives are zero then no root could be
                         // calculated
           printf("nan\t");
           if (argc == 4) {  // if the user chose 4 arguments then assign the
