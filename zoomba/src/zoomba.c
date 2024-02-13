@@ -274,7 +274,7 @@ int main(void) {
   for (int i = 0; i < dim; i++) {
     int read = fread(room[i], 1, dim, stdin);
     if (read != dim) exit(1);
-    if (!(fread(temp, 1, 1, stdin))) exit(1);
+    n=(char)fread(temp, 1, 1, stdin);
   }
   if (feof(stdin) == EOF) exit(1);
   if (room[poszoo_x][poszoo_y] == '1' || room[trash_x][trash_y] == '1')
